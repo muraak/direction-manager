@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title></title>
+    <script src="./registory-app.js"></script>
+</head>
+<style>
+    #items>.item{
+        background-color: blanchedalmond;
+    }
+
+    #items-chosen>.item{
+        background-color: aquamarine;
+    }
+
+    /* 何も入力されていない時にhtmlのdata-text属性で指定したガイドメッセージを表示させる */
+    [contentEditable=true]:empty:before{
+        content:attr(data-text);
+        color: gray;
+    }
+    /* フォーカスが当たっていない時だけ表示させる場合はこっち */
+    /* [contentEditable=true]:empty:not(:focus):before{
+        content:attr(data-text)
+    } */
+
+    #items{
+        height: 20vh;
+        width: 100vw;
+        border-bottom: 1px solid rgba(0,0,0,.5);
+        overflow-x: scroll;
+        overflow-y: hidden;
+        white-space: nowrap;
+    }
+
+    #items-chosen{
+        height: 60vh;
+        width: 100vw;
+        white-space: nowrap;
+    }
+
+    #items>.item{
+        width: 40vw;
+        height: 100%;
+        display: inline-block;
+        border-radius: 0px !important;
+    }
+
+    #items-chosen,#items{
+        display: inline-block;
+        vertical-align: top;
+        min-height: 10vh;
+        /* width: 80vw; */
+        border-right: 1px solid rgba(0,0,0,.5);
+    }
+
+    .name,.url{
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    .picked {
+        color: #fff;
+        background-color:magenta !important;
+    }
+</style>
+<body>
+    <div id="main">
+        <div id="adding">
+            <div 
+                id="add-name"
+                contenteditable="true" 
+                aria-multiline="true"
+                role="textbox"
+                data-text="追加する場所の名前："></div>
+            <div
+                id="add-url"
+                contenteditable="true"
+                aria-multiline="true"
+                role="textbox"
+                data-text="追加する場所のグーグルマップURL："></div>
+            <input id="add" type="button" value="追加"/>
+        </div>
+        <div id="items">
+        </div>
+        <div>
+            <input id="generate" type="button" value="ルート生成"/>
+        </div>
+        <div id="items-chosen">
+        </div>
+    </div>
+</body>
+</html>

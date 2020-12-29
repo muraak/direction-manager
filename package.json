@@ -1,0 +1,16 @@
+{
+  "name": "shuttle-manager",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "browserify": "^16.5.2",
+    "shortid": "^2.2.16",
+    "sortablejs": "^1.10.2"
+  }
+}
