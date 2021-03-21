@@ -1,5 +1,7 @@
-var Sortable = require('sortablejs');
+const Sortable = require('sortablejs');
 const shortid = require('shortid');
+var $ = require('jquery');
+
 
 window.onload = function () {
     entry();
@@ -8,14 +10,13 @@ window.onload = function () {
 function entry() {
     document.getElementById('add').onclick = addItem;
     document.getElementById('generate').onclick = generateRoute;
-    var sortable = new Sortable(document.getElementById('items'), { group: 'shared', chosenClass: "picked", animation: 150 });
-    var sortable_chosen = new Sortable(document.getElementById('items-chosen'), { group: 'shared', chosenClass: "picked", animation: 150});
+    var sortable = new Sortable(document.getElementById('items'), { group: 'shared', chosenClass: "picked", animation: 150, handle: ".btn-move" });
+    var sortable_chosen = new Sortable(document.getElementById('items-chosen'), { group: 'shared', chosenClass: "picked", animation: 150, handle: ".btn-move" });
     var registories = [];
     updateAll();
 }
 
 // View
-
 function updateView(registories) {
     let view = document.getElementById('items')
 
@@ -28,7 +29,12 @@ function updateView(registories) {
     });
 }
 
+
 function dataToElement(data) {
+
+    var elem_move_btn = document.createElement("div");
+    elem_move_btn.className = "btn-move"
+    elem_move_btn.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="16px" height="100px" fill="currentColor" viewBox="0 0 24 24" width="24" height="24"><path fill="none" d="M0 0h24v24H0z"/><path d="M18 11V8l4 4-4 4v-3h-5v5h3l-4 4-4-4h3v-5H6v3l-4-4 4-4v3h5V6H8l4-4 4 4h-3v5z"/></svg>`
     var elem_name = document.createElement("div");
     elem_name.innerText = data.name;
     elem_name.className = "name";
@@ -48,10 +54,22 @@ function dataToElement(data) {
     var elem = document.createElement("div");
     elem.className = "item myHandle";
     elem.id = data.id;
-    elem.appendChild(elem_name);
-    elem.appendChild(elem_url);
-    elem.appendChild(elem_remove_button);
-    elem.appendChild(elem_edit_button);
+    var div_content = document.createElement("div");
+    div_content.className = "item-content";
+    div_content.appendChild(elem_name);
+    div_content.appendChild(elem_url);
+    div_content.appendChild(elem_remove_button);
+    div_content.appendChild(elem_edit_button);
+    var table = document.createElement("table");
+    var row = document.createElement("tr");
+    var col1 = document.createElement("td");
+    var col2 = document.createElement("td");
+    col1.appendChild(elem_move_btn);
+    col2.appendChild(div_content);
+    row.appendChild(col1);
+    row.appendChild(col2);
+    table.appendChild(row);
+    elem.appendChild(table);
     return elem;
 }
 
@@ -64,13 +82,12 @@ function elementToData(elem) {
         if (el.className === "name") {
             name = el.innerText;
         }
-        else if(el.className === "url")
-        {
+        else if (el.className === "url") {
             url = el.innerText;
         }
     });
 
-    return {id: id, name: name,  url: url};
+    return { id: id, name: name, url: url };
 }
 
 function enterEditMode(elem) {
@@ -79,8 +96,7 @@ function enterEditMode(elem) {
             el.contentEditable = true;
             el.role = "textbox";
         }
-        else if(el.className === "item-button")
-        {
+        else if (el.className === "item-button") {
             el.hidden = true;
         }
     });
@@ -88,12 +104,12 @@ function enterEditMode(elem) {
     elem_update_button.type = "button"
     elem_update_button.value = "更新"
     elem_update_button.className = "item-button";
-    elem_update_button.onclick = function(){ updateItem(elem_update_button) };
+    elem_update_button.onclick = function () { updateItem(elem_update_button) };
     var elem_cancel_button = document.createElement("input")
     elem_cancel_button.type = "button"
     elem_cancel_button.value = "キャンセル"
     elem_cancel_button.className = "item-button";
-    elem_cancel_button.onclick = function(){ cancelUpdateItem(elem_cancel_button) };
+    elem_cancel_button.onclick = function () { cancelUpdateItem(elem_cancel_button) };
     elem.appendChild(elem_update_button);
     elem.appendChild(elem_cancel_button);
 }
@@ -124,15 +140,15 @@ function addItem() {
         name: document.getElementById('add-name').innerText,
         url: document.getElementById('add-url').innerText
     };
-    try { 
+    try {
         valitate(item)
         add(item);
         clearInputFields();
         updateAll();
     }
-    catch(e){ 
+    catch (e) {
         alert(e)
-    }    
+    }
 }
 
 function removeItem(elem) {
@@ -146,12 +162,12 @@ function editItem(elem) {
 
 function updateItem(elem) {
     var item = elementToData(elem.parentNode);
-    try { 
+    try {
         valitate(item)
         update(item);
         updateAll();
     }
-    catch(e){ 
+    catch (e) {
         alert(e)
     }
 }
@@ -168,7 +184,7 @@ function generateRoute() {
     var url = routeToUrl(getRouteFromView());
     window.open(url, '_blank');
 }
- 
+
 // Model
 
 const dbName = 'MyRouteRegistoriesDB';
@@ -181,15 +197,15 @@ function getAllItems(callback) {
 
     openReq.onupgradeneeded = function (event) {
         var db = event.target.result;
-        db.createObjectStore(storeName, {keyPath : 'id'})
+        db.createObjectStore(storeName, { keyPath: 'id' })
         console.log('db upgrade');
     }
     openReq.onsuccess = function (event) {
         var db = event.target.result;
         var trans = db.transaction(storeName, 'readonly');
         var store = trans.objectStore(storeName);
-        
-        var getReq = store.getAll().onsuccess = function(event){
+
+        var getReq = store.getAll().onsuccess = function (event) {
             callback(event.target.result);
             // 接続を解除する
             db.close();
@@ -207,8 +223,8 @@ function add(item) {
         var db = event.target.result;
         var trans = db.transaction(storeName, 'readwrite');
         var store = trans.objectStore(storeName);
-        
-        var getReq = store.put(item).onsuccess = function(event){
+
+        var getReq = store.put(item).onsuccess = function (event) {
             // 接続を解除する
             db.close();
         }
@@ -225,8 +241,8 @@ function remove(id) {
         var db = event.target.result;
         var trans = db.transaction(storeName, 'readwrite');
         var store = trans.objectStore(storeName);
-        
-        var getReq = store.delete(id).onsuccess = function(event){
+
+        var getReq = store.delete(id).onsuccess = function (event) {
             // 接続を解除する
             db.close();
         }
@@ -243,12 +259,12 @@ function update(item) {
         var db = event.target.result;
         var trans = db.transaction(storeName, 'readwrite');
         var store = trans.objectStore(storeName);
-        
-        var getReq = store.get(item.id).onsuccess = function(event){
+
+        var getReq = store.get(item.id).onsuccess = function (event) {
             var tgt = event.target.result;
             tgt.name = item.name;
             tgt.url = item.url;
-            var putReq = store.put(item).onsuccess = function(event){
+            var putReq = store.put(item).onsuccess = function (event) {
                 // 接続を解除する
                 db.close();
             }
@@ -266,16 +282,14 @@ function update(item) {
 
 function valitate(item) {
 
-    if(item.name === "")
-    {
+    if (item.name === "") {
         throw "名前が空です。"
     }
 
-    var regex_google_map_place_url = /https:\/\/www\.google\.co\.jp\/maps\/place\/.+/;
+    var regex_google_map_place_url = /https:\/\/www\.google\.co\.jp\/maps\/.+/;
 
-    if(regex_google_map_place_url.test(item.url) === false)
-    {
-        throw "URLにはGoogleマップのもの(\"https://www.google.co.jp/maps/place/\"で始まるURL)を指定してください。"
+    if (regex_google_map_place_url.test(item.url) === false) {
+        throw "URLにはGoogleマップのもの(\"https://www.google.co.jp/maps/\"で始まるURL)を指定してください。"
     }
 
     return 0;
@@ -283,7 +297,7 @@ function valitate(item) {
 
 function routeToUrl(route) {
     var url = "https://www.google.co.jp/maps/dir"
-    route.forEach((it)=>{
+    route.forEach((it) => {
         var place = brewPlace(it.url)
         url = url.concat("/")
         url = url.concat(place);

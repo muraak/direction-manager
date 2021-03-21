@@ -10,6 +10,8 @@
   "license": "ISC",
   "dependencies": {
     "browserify": "^16.5.2",
+    "jquery": "^3.6.0",
+    "link-preview-js": "^2.1.6",
     "shortid": "^2.2.16",
     "sortablejs": "^1.10.2"
   }
